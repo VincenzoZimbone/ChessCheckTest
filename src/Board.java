@@ -3,7 +3,7 @@ public class Board {
     private boolean gameInProgress = true;
     private boolean prevTurn = false;
     private boolean whiteColor = true;
-
+    private Piece[][] reverse=new Piece[1][2];
     //salvataggio board
     private static final Piece[][] pieces = new Piece[8][8];
 
@@ -100,6 +100,13 @@ public class Board {
             if (getPiece(prevX, prevY) != null && getPiece(prevX, prevY).isWhiteColor() != prevTurn) {
                 if (!checkAlly(prevX, prevY, nextX, nextY)) {
                     setPiece(prevX, prevY, nextX, nextY);
+                    if(underCheck(whiteColor)){
+                        reverseMove(prevX, prevY, nextX, nextY);
+                        prevTurn = !prevTurn;
+                        throw new Exception("Non puoi fare questa mossa, saresti sotto scacco");
+                    }
+
+                    //controllo checKing(prevX, prevY, nextX, nextY)
                 } else {
                     throw new Exception("Mossa non valida, casella occupata da una pedina alleata.");
                 }
@@ -122,12 +129,20 @@ public class Board {
 
     private void setPiece(int prevX, int prevY, int nextX, int nextY) throws Exception {
         if (pieces[prevX][prevY].checkForMove(prevX, prevY, nextX, nextY)) {
+            reverse[0][0]=pieces[prevX][prevY];
+            reverse[0][1]=pieces[nextX][nextY];
             pieces[nextX][nextY] = pieces[prevX][prevY];
             pieces[prevX][prevY] = null;
         } else {
             throw new Exception("Mossa non valida");
         }
         prevTurn = !prevTurn;
+    }
+
+
+    private void reverseMove(int prevX, int prevY, int nextX, int nextY) throws Exception{
+        pieces[prevX][prevY]=reverse[0][0];
+        pieces[nextX][nextY]=reverse[0][1];
     }
 
     public static Piece getPiece(int currentX, int currentY) {
